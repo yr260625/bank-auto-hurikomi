@@ -9,6 +9,21 @@ import json
 import os
 import random
 import traceback
+import sys
+
+
+def load_config(config_file: str):
+    """設定ファイルJSON読み込み
+
+    Args:
+        config_file (str): 設定ファイルパス
+
+    Returns:
+        dict: 読み込んだ設定ファイルの内容
+    """
+    with open(config_file, "r", encoding="utf-8") as file:
+        config = json.load(file)
+    return config
 
 
 def create_driver() -> WebDriver:
@@ -63,6 +78,10 @@ def create_bta() -> BankTransferAutomation:
 
 if __name__ == "__main__":
 
+    if len(sys.argv) != 2:
+        print("Usage: python -m main config_file")
+        sys.exit(1)
+
     try:
         print("-------------------------------------------")
         print("bank auto hurikomi start")
@@ -72,17 +91,18 @@ if __name__ == "__main__":
         bta.login()
         bta.move_to_torihiki()
 
-        # 銀行１
-        bta.move_to_hurikomi()
-        bta.execute_hurikomi(0)
-        bta.execute_ninsyo()
-        bta.move_to_torihiki()
+        # 設定ファイルから振り込み対象、振込金額を取得
+        config_file = sys.argv[1]
+        config = load_config(config_file)
 
-        # 銀行２
-        bta.move_to_hurikomi()
-        bta.execute_hurikomi(1)
-        bta.execute_ninsyo()
-        bta.move_to_torihiki()
+        # 振込実行
+        for transfer in config["transfers"]:
+            bank, amount = transfer["bank"], transfer["amount"]
+            print(f"{bank}: {amount}")
+            bta.move_to_hurikomi()
+            bta.execute_hurikomi(bank, amount)
+            bta.execute_ninsyo()
+            bta.move_to_torihiki()
 
         # 結果参照
         bta.move_to_meisai()

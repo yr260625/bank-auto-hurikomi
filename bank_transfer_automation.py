@@ -39,7 +39,6 @@ class BankTransferAutomation:
         self.wait_time = int(env_var["wait_time"])
         self.kaiin_no = env_var["kaiin_no"]
         self.password = env_var["password"]
-        self.hurikomi_money = env_var["hurikomi_money"]
         self.key_map = env_var["key_map"]
         self.login_url = env_var["login_url"]
         self.driver = driver
@@ -114,7 +113,7 @@ class BankTransferAutomation:
         transit_button_element.click()
 
     @wait_random_time
-    def execute_hurikomi(self, payee: int) -> None:
+    def execute_hurikomi(self, bank_name: str, amount: str) -> None:
         """振込実行
 
         Args:
@@ -122,21 +121,22 @@ class BankTransferAutomation:
         """
 
         # 振込先選択
-        radio_button = WebDriverWait(self.driver, self.wait_time).until(
-            EC.presence_of_element_located(
-                (
-                    By.XPATH,
-                    f'//input[@type="radio" and @name="selectedIdx" and @value="{payee}"]',
-                )
-            )
+        rows = self.driver.find_elements(
+            By.XPATH, "//tr[td/input[@type='radio' and @name='selectedIdx']]"
         )
-        radio_button.click()
+        for row in rows:
+            if bank_name in row.text:
+                radio_button = row.find_element(
+                    By.XPATH, ".//input[@type='radio' and @name='selectedIdx']"
+                )
+                radio_button.click()
+                break
 
         # 振込金額を入力
         money_element = WebDriverWait(self.driver, self.wait_time).until(
             EC.presence_of_element_located((By.NAME, "kingakuDisp"))
         )
-        money_element.send_keys(self.hurikomi_money)
+        money_element.send_keys(amount)
 
         # 認証ページに遷移
         transit_button_element = WebDriverWait(self.driver, self.wait_time).until(
