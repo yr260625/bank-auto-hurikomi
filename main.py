@@ -1,16 +1,17 @@
 from bank_transfer_automation import BankTransferAutomation
 from dotenv import load_dotenv
 from selenium import webdriver
-from selenium.webdriver.chrome import service
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.remote.webdriver import WebDriver
+from webdriver_manager.chrome import ChromeDriverManager
 import json
 import os
 import random
 import traceback
 
 
-def create_driver(driver_pass: str) -> WebDriver:
+def create_driver() -> WebDriver:
     """
     WebDriver作成
 
@@ -18,19 +19,23 @@ def create_driver(driver_pass: str) -> WebDriver:
         WebDriver
     """
 
+    # User Agentをランダムに指定
     ua_list = [
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36",
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36",
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
     ]
+    user_agent = random.choice(ua_list)
+
+    # オプション設定
     options = Options()
-    user_agent = ua_list[random.randrange(0, len(ua_list), 1)]
     options.add_argument("--user-agent=" + user_agent)
     options.add_experimental_option("excludeSwitches", ["enable-logging"])
     options.add_experimental_option("detach", True)
 
-    chrome_service = service.Service(executable_path=driver_pass)
-    return webdriver.Chrome(service=chrome_service, options=options)
+    # chrome最新バージョンのドライバを返却
+    service = Service(executable_path=ChromeDriverManager().install())
+    return webdriver.Chrome(service=service, options=options)
 
 
 def create_bta() -> BankTransferAutomation:
@@ -51,7 +56,7 @@ def create_bta() -> BankTransferAutomation:
         "login_url": str(os.getenv("LOGIN_URL")),
     }
 
-    driver = create_driver(str(os.getenv("CHROMEDRIVER")))
+    driver = create_driver()
     bta = BankTransferAutomation(env_var, driver)
     return bta
 
