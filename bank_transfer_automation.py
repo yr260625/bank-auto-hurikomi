@@ -76,7 +76,9 @@ class BankTransferAutomation:
 
         # インターネットバンキングメニューから「お取引・残高照会」を選択
         menu_button_element = WebDriverWait(self.driver, self.wait_time).until(
-            EC.presence_of_element_located((By.XPATH, '//a[text()="お取引・残高照会"]'))
+            EC.presence_of_element_located(
+                (By.XPATH, '//a[img[@alt="お取引き・残高照会"]]')
+            )
         )
         menu_button_element.click()
 
@@ -177,25 +179,6 @@ class BankTransferAutomation:
         transit_button_element = WebDriverWait(self.driver, self.wait_time).until(
             EC.presence_of_element_located(
                 (By.XPATH, '//input[@type="button" and contains(@value, "確定")]')
-            )
-        )
-        transit_button_element.click()
-
-    @wait_random_time
-    def back_to_torihiki(self) -> None:
-        """取引ページに遷移(戻る)
-
-        Args:
-            driver (WebDriver): Chromeドライバー
-        """
-
-        # 戻るボタン押下
-        transit_button_element = WebDriverWait(self.driver, self.wait_time).until(
-            EC.presence_of_element_located(
-                (
-                    By.XPATH,
-                    '//input[@type="button" and contains(@value, "お取引・残高照会のトップへ戻る")]',
-                )
             )
         )
         transit_button_element.click()

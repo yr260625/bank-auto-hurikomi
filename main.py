@@ -76,13 +76,13 @@ if __name__ == "__main__":
         bta.move_to_hurikomi()
         bta.execute_hurikomi(0)
         bta.execute_ninsyo()
-        bta.back_to_torihiki()
+        bta.move_to_torihiki()
 
         # 銀行２
         bta.move_to_hurikomi()
         bta.execute_hurikomi(1)
         bta.execute_ninsyo()
-        bta.back_to_torihiki()
+        bta.move_to_torihiki()
 
         # 結果参照
         bta.move_to_meisai()
