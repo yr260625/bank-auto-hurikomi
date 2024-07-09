@@ -66,7 +66,6 @@ def create_bta() -> BankTransferAutomation:
         "wait_time": str(os.getenv("WAIT_TIME")),
         "kaiin_no": str(os.getenv("KAIIN_NO")),
         "password": str(os.getenv("PASSWORD")),
-        "hurikomi_money": str(os.getenv("HURIKOMI_MONEY")),
         "key_map": json.loads(str(os.getenv("KEY_MAP_STR"))),
         "login_url": str(os.getenv("LOGIN_URL")),
     }
