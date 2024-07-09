@@ -157,7 +157,6 @@ class BankTransferAutomation:
         )
         for span in span_elements:
             key_list.append(span.text)
-        print(key_list)
 
         # 確認番号入力
         input_elements = self.driver.find_elements(
