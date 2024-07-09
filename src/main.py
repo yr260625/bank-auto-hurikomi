@@ -101,7 +101,7 @@ if __name__ == "__main__":
             print(f"{bank}: {amount}")
             bta.move_to_hurikomi()
             bta.execute_hurikomi(bank, amount)
-            # bta.execute_ninsyo()
+            bta.execute_ninsyo()
             bta.move_to_torihiki()
 
         # 結果参照
