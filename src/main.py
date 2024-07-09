@@ -1,4 +1,4 @@
-from bank_transfer_automation import BankTransferAutomation
+from .bank_transfer_automation import BankTransferAutomation
 from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -79,7 +79,7 @@ def create_bta() -> BankTransferAutomation:
 if __name__ == "__main__":
 
     if len(sys.argv) != 2:
-        print("Usage: python -m main config_file")
+        print("Usage: python -m src.main config.json")
         sys.exit(1)
 
     try:
@@ -101,7 +101,7 @@ if __name__ == "__main__":
             print(f"{bank}: {amount}")
             bta.move_to_hurikomi()
             bta.execute_hurikomi(bank, amount)
-            bta.execute_ninsyo()
+            # bta.execute_ninsyo()
             bta.move_to_torihiki()
 
         # 結果参照
