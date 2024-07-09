@@ -1,14 +1,13 @@
+from bank_transfer_automation import BankTransferAutomation
+from dotenv import load_dotenv
 from selenium import webdriver
-from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.chrome import service
 from selenium.webdriver.chrome.options import Options
-from dotenv import load_dotenv
+from selenium.webdriver.remote.webdriver import WebDriver
+import json
 import os
 import random
-import json
 import traceback
-
-from bank_transfer_automation import BankTransferAutomation
 
 
 def create_driver(driver_pass: str) -> WebDriver:
@@ -28,22 +27,18 @@ def create_driver(driver_pass: str) -> WebDriver:
     user_agent = ua_list[random.randrange(0, len(ua_list), 1)]
     options.add_argument("--user-agent=" + user_agent)
     options.add_experimental_option("excludeSwitches", ["enable-logging"])
-    # テスト用に開きっぱなしにする
     options.add_experimental_option("detach", True)
 
     chrome_service = service.Service(executable_path=driver_pass)
     return webdriver.Chrome(service=chrome_service, options=options)
 
 
-def get_bta() -> BankTransferAutomation:
-    """環境変数取得
+def create_bta() -> BankTransferAutomation:
+    """
+    BankTransferAutomation生成
 
-    Args:
-        name (str): 環境変数名称
-    Raises:
-        ValueError: 未定義時に発生
     Returns:
-        str: 環境変数値
+        BankTransferAutomation
     """
 
     load_dotenv()
@@ -66,7 +61,7 @@ if __name__ == "__main__":
     try:
         print("-------------------------------------------")
         print("bank auto hurikomi start")
-        bta = get_bta()
+        bta = create_bta()
 
         # ログイン後、取引ページに遷移
         bta.login()
