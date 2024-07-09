@@ -12,10 +12,10 @@ import traceback
 
 def create_driver(driver_pass: str) -> WebDriver:
     """
-    Chromeドライバー作成
+    WebDriver作成
 
     Returns:
-        WebDriver: Chromeドライバー
+        WebDriver
     """
 
     ua_list = [

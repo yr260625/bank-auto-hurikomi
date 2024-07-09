@@ -30,7 +30,12 @@ def wait_random_time(func: Callable) -> Callable:
 
 class BankTransferAutomation:
     def __init__(self, env_var: dict[str, str], driver: WebDriver) -> None:
-        """初期化処理"""
+        """コンストラクタ
+
+        Args:
+            env_var (dict[str, str]): 環境変数一覧
+            driver (WebDriver): WebDriver
+        """
         self.wait_time = int(env_var["wait_time"])
         self.kaiin_no = env_var["kaiin_no"]
         self.password = env_var["password"]
@@ -41,11 +46,7 @@ class BankTransferAutomation:
 
     @wait_random_time
     def login(self) -> None:
-        """ログイン
-
-        Args:
-            driver (WebDriver): Chromeドライバー
-        """
+        """ログイン"""
 
         # ログインページにアクセス
         self.driver.get(self.login_url)
@@ -85,10 +86,9 @@ class BankTransferAutomation:
     @wait_random_time
     def move_to_meisai(self) -> None:
         """取引明細ページに遷移"""
-        driver = self.driver
 
         # 戻るボタン押下
-        transit_button_element = WebDriverWait(driver, self.wait_time).until(
+        transit_button_element = WebDriverWait(self.driver, self.wait_time).until(
             EC.presence_of_element_located(
                 (
                     By.XPATH,
@@ -100,11 +100,7 @@ class BankTransferAutomation:
 
     @wait_random_time
     def move_to_hurikomi(self) -> None:
-        """振込ページに遷移
-
-        Args:
-            driver (WebDriver): Chromeドライバー
-        """
+        """振込ページに遷移"""
 
         # 振込ページに遷移
         transit_button_element = WebDriverWait(self.driver, self.wait_time).until(
@@ -152,11 +148,7 @@ class BankTransferAutomation:
 
     @wait_random_time
     def execute_ninsyo(self) -> None:
-        """認証実行
-
-        Args:
-            driver (WebDriver): Chromeドライバー
-        """
+        """認証実行"""
 
         # 確認番号のキー一覧取得
         key_list = []
