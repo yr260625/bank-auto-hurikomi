@@ -4,7 +4,6 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.remote.webdriver import WebDriver
-from webdriver_manager.chrome import ChromeDriverManager
 import json
 import os
 import random
@@ -49,8 +48,7 @@ def create_driver() -> WebDriver:
     options.add_experimental_option("detach", True)
 
     # chrome最新バージョンのドライバを返却
-    service = Service(executable_path=ChromeDriverManager().install())
-    return webdriver.Chrome(service=service, options=options)
+    return webdriver.Chrome(service=Service(), options=options)
 
 
 def create_bta() -> BankTransferAutomation:
@@ -77,8 +75,8 @@ def create_bta() -> BankTransferAutomation:
 
 if __name__ == "__main__":
 
-    if len(sys.argv) != 2:
-        print("Usage: python -m src.main config.json")
+    if len(sys.argv) != 2 and len(sys.argv) != 3:
+        print("Usage: python -m src.main config.json <TEST>")
         sys.exit(1)
 
     try:
@@ -94,13 +92,17 @@ if __name__ == "__main__":
         config_file = sys.argv[1]
         config = load_config(config_file)
 
+        # テストモード
+        is_test = True if sys.argv[2] == "TEST" else False
+
         # 振込実行
         for transfer in config["transfers"]:
             bank, amount = transfer["bank"], transfer["amount"]
             print(f"{bank}: {amount}")
             bta.move_to_hurikomi()
             bta.execute_hurikomi(bank, amount)
-            bta.execute_ninsyo()
+            if not is_test:
+                bta.execute_ninsyo(is_test)
             bta.move_to_torihiki()
 
         # 結果参照
