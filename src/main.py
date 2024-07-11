@@ -93,7 +93,7 @@ if __name__ == "__main__":
         config = load_config(config_file)
 
         # テストモード
-        is_test = True if sys.argv[2] == "TEST" else False
+        is_test = True if len(sys.argv) == 3 else False
 
         # 振込実行
         for transfer in config["transfers"]:
@@ -102,7 +102,7 @@ if __name__ == "__main__":
             bta.move_to_hurikomi()
             bta.execute_hurikomi(bank, amount)
             if not is_test:
-                bta.execute_ninsyo(is_test)
+                bta.execute_ninsyo()
             bta.move_to_torihiki()
 
         # 結果参照
