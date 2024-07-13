@@ -10,6 +10,8 @@ import random
 import traceback
 import sys
 
+load_dotenv()
+
 
 def load_config(config_file: str):
     """設定ファイルJSON読み込み
@@ -59,17 +61,8 @@ def create_bta() -> BankTransferAutomation:
         BankTransferAutomation
     """
 
-    load_dotenv()
-    env_var = {
-        "wait_time": str(os.getenv("WAIT_TIME")),
-        "kaiin_no": str(os.getenv("KAIIN_NO")),
-        "password": str(os.getenv("PASSWORD")),
-        "key_map": json.loads(str(os.getenv("KEY_MAP_STR"))),
-        "login_url": str(os.getenv("LOGIN_URL")),
-    }
-
     driver = create_driver()
-    bta = BankTransferAutomation(env_var, driver)
+    bta = BankTransferAutomation(driver, int(str(os.getenv("WAIT_TIME"))))
     return bta
 
 
@@ -85,7 +78,11 @@ if __name__ == "__main__":
         bta = create_bta()
 
         # ログイン後、取引ページに遷移
-        bta.login()
+        bta.login(
+            str(os.getenv("LOGIN_URL")),
+            str(os.getenv("KAIIN_NO")),
+            str(os.getenv("PASSWORD")),
+        )
         bta.move_to_torihiki()
 
         # 設定ファイルから振り込み対象、振込金額を取得
@@ -102,7 +99,7 @@ if __name__ == "__main__":
             bta.move_to_hurikomi()
             bta.execute_hurikomi(bank, amount)
             if not is_test:
-                bta.execute_ninsyo()
+                bta.execute_ninsyo(json.loads(str(os.getenv("KEY_MAP_STR"))))
             bta.move_to_torihiki()
 
         # 結果参照

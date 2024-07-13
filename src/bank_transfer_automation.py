@@ -29,38 +29,34 @@ def wait_random_time(func: Callable) -> Callable:
 
 
 class BankTransferAutomation:
-    def __init__(self, env_var: dict[str, str], driver: WebDriver) -> None:
+    def __init__(self, driver: WebDriver, wait_time: int) -> None:
         """コンストラクタ
 
         Args:
             env_var (dict[str, str]): 環境変数一覧
             driver (WebDriver): WebDriver
         """
-        self.wait_time = int(env_var["wait_time"])
-        self.kaiin_no = env_var["kaiin_no"]
-        self.password = env_var["password"]
-        self.key_map = env_var["key_map"]
-        self.login_url = env_var["login_url"]
         self.driver = driver
+        self.wait_time = wait_time
 
     @wait_random_time
-    def login(self) -> None:
+    def login(self, login_url: str, kaiin_no: str, password: str) -> None:
         """ログイン"""
 
         # ログインページにアクセス
-        self.driver.get(self.login_url)
+        self.driver.get(login_url)
 
         # 会員番号
         kaiin_no_element = WebDriverWait(self.driver, self.wait_time).until(
             EC.presence_of_element_located((By.NAME, "kaiinNo"))
         )
-        kaiin_no_element.send_keys(self.kaiin_no)
+        kaiin_no_element.send_keys(kaiin_no)
 
         # ログインパスワード
         password_element = WebDriverWait(self.driver, self.wait_time).until(
             EC.presence_of_element_located((By.NAME, "ibpassword"))
         )
-        password_element.send_keys(self.password)
+        password_element.send_keys(password)
 
         # ログイン実行
         login_button_element = WebDriverWait(self.driver, self.wait_time).until(
@@ -147,7 +143,7 @@ class BankTransferAutomation:
         transit_button_element.click()
 
     @wait_random_time
-    def execute_ninsyo(self) -> None:
+    def execute_ninsyo(self, key_map: dict[str, str]) -> None:
         """認証実行"""
 
         # 確認番号のキー一覧取得
@@ -164,7 +160,7 @@ class BankTransferAutomation:
         )
         for i, input_element in enumerate(input_elements, start=0):
             input_element.clear()
-            input_element.send_keys(self.key_map[key_list[i]])
+            input_element.send_keys(key_map[key_list[i]])
 
         # 確定ボタン押下
         transit_button_element = WebDriverWait(self.driver, self.wait_time).until(
