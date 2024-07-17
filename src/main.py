@@ -1,3 +1,4 @@
+from typing import Any, Dict
 from .bank_transfer_automation import BankTransferAutomation
 from dotenv import load_dotenv
 from selenium import webdriver
@@ -27,25 +28,25 @@ def load_config(config_file: str):
     return config
 
 
-def create_driver(ua_list: list[str]) -> WebDriver:
+def create_driver(config: Dict[str, Any]) -> WebDriver:
     """
     WebDriver作成
 
     Args:
-        ua_list (list[str]): user-agent一覧
+        config (Dict[str, Any]): driver設定
 
     Returns:
         WebDriver
     """
 
     # User Agentをランダムに指定
-    user_agent = random.choice(ua_list)
+    user_agent = random.choice(config["ua_list"])
 
     # オプション設定
     options = Options()
     options.add_argument("--user-agent=" + user_agent)
-    options.add_experimental_option("excludeSwitches", ["enable-logging"])
-    options.add_experimental_option("detach", True)
+    options.add_experimental_option("excludeSwitches", config["excludeSwitches"])
+    options.add_experimental_option("detach", config["detach"])
 
     # chrome最新バージョンのドライバを返却
     return webdriver.Chrome(service=Service(), options=options)
@@ -61,7 +62,7 @@ if __name__ == "__main__":
     config_file = sys.argv[1]
     config = load_config(config_file)
 
-    driver = create_driver(config["user_agent_list"])
+    driver = create_driver(config["driver"])
     bta = BankTransferAutomation(driver, int(str(os.getenv("WAIT_TIME"))))
 
     try:
@@ -102,3 +103,5 @@ if __name__ == "__main__":
         print(f"Exception details: {str(e)}")
         print("Full traceback:")
         print(tb)
+    finally:
+        driver.quit()
