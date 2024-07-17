@@ -27,20 +27,18 @@ def load_config(config_file: str):
     return config
 
 
-def create_driver() -> WebDriver:
+def create_driver(ua_list: list[str]) -> WebDriver:
     """
     WebDriver作成
+
+    Args:
+        ua_list (list[str]): user-agent一覧
 
     Returns:
         WebDriver
     """
 
     # User Agentをランダムに指定
-    ua_list = [
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36",
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36",
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36",
-    ]
     user_agent = random.choice(ua_list)
 
     # オプション設定
@@ -53,29 +51,22 @@ def create_driver() -> WebDriver:
     return webdriver.Chrome(service=Service(), options=options)
 
 
-def create_bta() -> BankTransferAutomation:
-    """
-    BankTransferAutomation生成
-
-    Returns:
-        BankTransferAutomation
-    """
-
-    driver = create_driver()
-    bta = BankTransferAutomation(driver, int(str(os.getenv("WAIT_TIME"))))
-    return bta
-
-
 if __name__ == "__main__":
 
     if len(sys.argv) != 2 and len(sys.argv) != 3:
         print("Usage: python -m src.main config.json <TEST>")
         sys.exit(1)
 
+    # 設定ファイルから振り込み対象、振込金額を取得
+    config_file = sys.argv[1]
+    config = load_config(config_file)
+
+    driver = create_driver(config["user_agent_list"])
+    bta = BankTransferAutomation(driver, int(str(os.getenv("WAIT_TIME"))))
+
     try:
         print("-------------------------------------------")
         print("bank auto hurikomi start")
-        bta = create_bta()
 
         # ログイン後、取引ページに遷移
         bta.login(
@@ -84,10 +75,6 @@ if __name__ == "__main__":
             str(os.getenv("PASSWORD")),
         )
         bta.move_to_torihiki()
-
-        # 設定ファイルから振り込み対象、振込金額を取得
-        config_file = sys.argv[1]
-        config = load_config(config_file)
 
         # テストモード
         is_test = True if len(sys.argv) == 3 else False
