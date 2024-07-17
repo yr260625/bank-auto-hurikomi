@@ -39,12 +39,9 @@ def create_driver(config: Dict[str, Any]) -> WebDriver:
         WebDriver
     """
 
-    # User Agentをランダムに指定
-    user_agent = random.choice(config["ua_list"])
-
     # オプション設定
     options = Options()
-    options.add_argument("--user-agent=" + user_agent)
+    options.add_argument("--user-agent=" + random.choice(config["ua_list"]))
     options.add_experimental_option("excludeSwitches", config["excludeSwitches"])
     options.add_experimental_option("detach", config["detach"])
 
