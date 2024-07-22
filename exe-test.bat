@@ -1,3 +1,3 @@
 call .venv\Scripts\activate
-python -m src.main config.json TEST
+python -m src.main TEST
 pause

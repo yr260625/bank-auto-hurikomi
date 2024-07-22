@@ -51,16 +51,17 @@ def create_driver(config: Dict[str, Any]) -> WebDriver:
 
 if __name__ == "__main__":
 
-    if len(sys.argv) != 2 and len(sys.argv) != 3:
-        print("Usage: python -m src.main config.json <TEST>")
+    if len(sys.argv) != 1 and len(sys.argv) != 2:
+        print("Usage: python -m src.main <TEST>")
         sys.exit(1)
 
     # 設定ファイルから振り込み対象、振込金額を取得
-    config_file = sys.argv[1]
-    config = load_config(config_file)
-
+    config = load_config("config.json")
     driver = create_driver(config["driver"])
+    # BankTransferAutomation
     bta = BankTransferAutomation(driver, int(str(os.getenv("WAIT_TIME"))))
+    # テストモード
+    is_test = True if len(sys.argv) == 2 else False
 
     try:
         print("-------------------------------------------")
@@ -73,9 +74,6 @@ if __name__ == "__main__":
             str(os.getenv("PASSWORD")),
         )
         bta.move_to_torihiki()
-
-        # テストモード
-        is_test = True if len(sys.argv) == 3 else False
 
         # 振込実行
         for transfer in config["transfers"]:
