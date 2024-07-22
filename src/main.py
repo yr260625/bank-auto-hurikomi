@@ -9,9 +9,15 @@ import json
 import os
 import random
 import traceback
-import sys
 
-load_dotenv()
+
+def is_lambda_environment() -> bool:
+    """AWS Lambda環境で実行されたかどうか
+
+    Returns:
+        bool: AWS Lambda環境
+    """
+    return os.getenv("AWS_LAMBDA_FUNCTION_NAME") is not None
 
 
 def load_config(config_file: str):
@@ -39,29 +45,41 @@ def create_driver(config: Dict[str, Any]) -> WebDriver:
         WebDriver
     """
 
-    # オプション設定
-    options = Options()
-    options.add_argument("--user-agent=" + random.choice(config["ua_list"]))
-    options.add_experimental_option("excludeSwitches", config["excludeSwitches"])
-    options.add_experimental_option("detach", config["detach"])
+    if is_lambda_environment():
+        # オプション設定
+        options = webdriver.ChromeOptions()
+        options.add_argument("--headless")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--single-process")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-dev-tools")
+        options.add_argument("--user-agent=" + random.choice(config["ua_list"]))
+        options.binary_location = "/opt/chrome/chrome"
+        # Chromeドライバーのサービスを設定
+        service = Service(executable_path="/opt/chromedriver")
 
-    # chrome最新バージョンのドライバを返却
-    return webdriver.Chrome(service=Service(), options=options)
+        return webdriver.Chrome(service=service, options=options)
+    else:
+        # オプション設定
+        options = Options()
+        options.add_argument("--user-agent=" + random.choice(config["ua_list"]))
+        options.add_experimental_option("excludeSwitches", ["enable-logging"])
+        # 最新バージョンのChromeドライバを返却
+        service = Service()
+
+        return webdriver.Chrome(service=service, options=options)
 
 
-if __name__ == "__main__":
+def main():
+    """メインロジック"""
 
-    if len(sys.argv) != 1 and len(sys.argv) != 2:
-        print("Usage: python -m src.main <TEST>")
-        sys.exit(1)
-
-    # 設定ファイルから振り込み対象、振込金額を取得
+    # Chromeドライバー生成
     config = load_config("config.json")
     driver = create_driver(config["driver"])
-    # BankTransferAutomation
+
+    # BankTransferAutomation生成
     bta = BankTransferAutomation(driver, int(str(os.getenv("WAIT_TIME"))))
-    # テストモード
-    is_test = True if len(sys.argv) == 2 else False
 
     try:
         print("-------------------------------------------")
@@ -81,7 +99,7 @@ if __name__ == "__main__":
             print(f"{bank}: {amount}")
             bta.move_to_hurikomi()
             bta.execute_hurikomi(bank, amount)
-            if not is_test:
+            if not os.getenv("MODE_TEST") == "1":
                 bta.execute_ninsyo(json.loads(str(os.getenv("KEY_MAP_STR"))))
             bta.move_to_torihiki()
 
@@ -100,3 +118,14 @@ if __name__ == "__main__":
         print(tb)
     finally:
         driver.quit()
+
+
+def handler(event, context):
+    """Lambda関数ハンドラー"""
+    main()
+
+
+if __name__ == "__main__":
+    """BATファイルによる実行"""
+    load_dotenv()
+    main()
