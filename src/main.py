@@ -114,7 +114,6 @@ def main():
             f"Exception occurred in function: {traceback.extract_tb(e.__traceback__)[-1].name}"
         )
         print(f"Exception details: {str(e)}")
-        print("Full traceback:")
         print(tb)
     finally:
         driver.quit()
