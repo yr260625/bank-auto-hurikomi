@@ -124,7 +124,6 @@ def handler(event, context):
 
 def execute_headfull():
     """ヘッドフルモード"""
-    load_dotenv()
     config = load_config("config.json")
     driver = create_driver_headfull(config["driver"])
     main(config, driver)
@@ -132,13 +131,13 @@ def execute_headfull():
 
 def execute_headless():
     """ヘッドレスモード"""
-    load_dotenv()
     config = load_config("config.json")
     driver = create_driver_headless(config["driver"])
     main(config, driver)
 
 
 if __name__ == "__main__":
+    load_dotenv()
     if os.getenv("LAMBDA_RUNTIME_DIR") is not None:
         execute_headless()
     else:

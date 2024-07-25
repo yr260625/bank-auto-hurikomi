@@ -1,0 +1,8 @@
+services:
+  lambda:
+    build: .
+    container_name: bank-auto-transfer
+    ports:
+      - 9001:8080
+    volumes:
+      - .:/var/task
