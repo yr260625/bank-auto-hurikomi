@@ -11,15 +11,6 @@ import random
 import traceback
 
 
-def is_lambda_environment() -> bool:
-    """AWS Lambda環境で実行されたかどうか
-
-    Returns:
-        bool: AWS Lambda環境
-    """
-    return os.getenv("AWS_LAMBDA_FUNCTION_NAME") is not None
-
-
 def load_config(config_file: str):
     """設定ファイルJSON読み込み
 
@@ -34,7 +25,7 @@ def load_config(config_file: str):
     return config
 
 
-def create_driver(config: Dict[str, Any]) -> WebDriver:
+def create_driver_headless(config: Dict[str, Any]) -> WebDriver:
     """
     WebDriver作成
 
@@ -44,39 +35,44 @@ def create_driver(config: Dict[str, Any]) -> WebDriver:
     Returns:
         WebDriver
     """
+    # オプション設定
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--single-process")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-dev-tools")
+    options.add_argument("--user-agent=" + random.choice(config["ua_list"]))
+    options.binary_location = "/opt/chrome/chrome"
+    # Chromeドライバーのサービスを設定
+    service = Service(executable_path="/opt/chromedriver")
 
-    if is_lambda_environment():
-        # オプション設定
-        options = webdriver.ChromeOptions()
-        options.add_argument("--headless")
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-gpu")
-        options.add_argument("--single-process")
-        options.add_argument("--disable-dev-shm-usage")
-        options.add_argument("--disable-dev-tools")
-        options.add_argument("--user-agent=" + random.choice(config["ua_list"]))
-        options.binary_location = "/opt/chrome/chrome"
-        # Chromeドライバーのサービスを設定
-        service = Service(executable_path="/opt/chromedriver")
-
-        return webdriver.Chrome(service=service, options=options)
-    else:
-        # オプション設定
-        options = Options()
-        options.add_argument("--user-agent=" + random.choice(config["ua_list"]))
-        options.add_experimental_option("excludeSwitches", ["enable-logging"])
-        # 最新バージョンのChromeドライバを返却
-        service = Service()
-
-        return webdriver.Chrome(service=service, options=options)
+    return webdriver.Chrome(service=service, options=options)
 
 
-def main():
+def create_driver_headfull(config: Dict[str, Any]) -> WebDriver:
+    """
+    WebDriver作成
+
+    Args:
+        config (Dict[str, Any]): driver設定
+
+    Returns:
+        WebDriver
+    """
+    # オプション設定
+    options = Options()
+    options.add_argument("--user-agent=" + random.choice(config["ua_list"]))
+    options.add_experimental_option("excludeSwitches", ["enable-logging"])
+    # 最新バージョンのChromeドライバを返却
+    service = Service()
+
+    return webdriver.Chrome(service=service, options=options)
+
+
+def main(config: Dict[str, Any], driver: WebDriver):
     """メインロジック"""
-
-    # Chromeドライバー生成
-    config = load_config("config.json")
-    driver = create_driver(config["driver"])
 
     # BankTransferAutomation生成
     bta = BankTransferAutomation(driver, int(str(os.getenv("WAIT_TIME"))))
@@ -121,10 +117,29 @@ def main():
 
 def handler(event, context):
     """Lambda関数ハンドラー"""
-    main()
+    config = load_config("config.json")
+    driver = create_driver_headless(config["driver"])
+    main(config, driver)
+
+
+def execute_headfull():
+    """ヘッドフルモード"""
+    load_dotenv()
+    config = load_config("config.json")
+    driver = create_driver_headfull(config["driver"])
+    main(config, driver)
+
+
+def execute_headless():
+    """ヘッドレスモード"""
+    load_dotenv()
+    config = load_config("config.json")
+    driver = create_driver_headless(config["driver"])
+    main(config, driver)
 
 
 if __name__ == "__main__":
-    """BATファイルによる実行"""
-    load_dotenv()
-    main()
+    if os.getenv("LAMBDA_RUNTIME_DIR") is not None:
+        execute_headless()
+    else:
+        execute_headfull()
