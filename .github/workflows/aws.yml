@@ -22,14 +22,13 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Echo a secret  
-      run: echo "your secret token is ${{ secrets.AWS_IAM_ROLE_ARN }}"
-
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
         role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
         aws-region: ${{ env.AWS_REGION }}
+
+    - run: echo "your secret token is ${{ secrets.AWS_IAM_ROLE_ARN }}"
 
     # - name: Login to Amazon ECR
     #   id: login-ecr
