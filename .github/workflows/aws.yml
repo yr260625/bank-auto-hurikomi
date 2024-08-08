@@ -25,7 +25,7 @@ jobs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        role-to-assume: arn:aws:iam::211125394445:role/github-actions-example-role
+        role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
         aws-region: ${{ env.AWS_REGION }}
 
     - run: echo "your secret token is ${{ secrets.AWS_IAM_ROLE_ARN }}"
